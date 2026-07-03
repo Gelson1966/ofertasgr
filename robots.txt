@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin-local.html
+Disallow: /admin-local.js
+
+Sitemap: https://ofertasgr.com/sitemap.xml
