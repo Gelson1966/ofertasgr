@@ -386,6 +386,13 @@
       }
       .product-detail-box::before { display: none; }
     }
+    /* No celular a caixinha de detalhe fica totalmente desativada */
+    @media (max-width: 640px) {
+      .product-image-wrap:hover ~ .product-detail-box,
+      .product-card.detail-open .product-detail-box {
+        display: none !important;
+      }
+    }
     .product-image-wrap {
       position: relative;
       aspect-ratio: 1.22 / 1;
@@ -393,6 +400,7 @@
       place-items: center;
       padding: 20px 20px 4px 20px;
       background: linear-gradient(145deg, #f8fbff, var(--blue-soft));
+      cursor: pointer;
     }
     .product-image { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
     .product-placeholder { font-size: 62px; filter: drop-shadow(0 12px 12px rgba(15,61,122,.12)); }

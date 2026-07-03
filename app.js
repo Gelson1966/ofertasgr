@@ -1,6 +1,5 @@
 import { db, collection, onSnapshot } from "./firebase-config.js";
 
-const CAT_IMAGENS_KEY = "ofertasgr_imagens_categorias_v1";
 const CATEGORY_IMAGES = {
   "beleza-fem": "imagens/SIMBOLOS/menu-beleza-feminina.png",
   "beleza-masc": "imagens/SIMBOLOS/menu-beleza-masculina.png",
@@ -22,13 +21,21 @@ let imagensCategorias = {};
 let paginaAtual=1;
 const PRODUTOS_POR_PAGINA=20;
 
-function carregarDadosPublicos() {
-  try {
-    const imagensSalvas = localStorage.getItem(CAT_IMAGENS_KEY);
-    imagensCategorias = imagensSalvas ? JSON.parse(imagensSalvas) : {};
-  } catch {
-    imagensCategorias = {};
-  }
+// As imagens personalizadas de categoria ficam no Firestore (coleção
+// "categoriaImagens"), assim aparecem pra todos os visitantes e não somem
+// quando o cache do navegador é limpo.
+function escutarImagensCategoriasEmTempoReal() {
+  onSnapshot(collection(db, "categoriaImagens"), snapshot => {
+    const novasImagens = {};
+    snapshot.docs.forEach(item => {
+      const dados = item.data();
+      if (dados && dados.imagem) novasImagens[item.id] = dados.imagem;
+    });
+    imagensCategorias = novasImagens;
+    montarCategorias();
+  }, erro => {
+    console.error("Não foi possível carregar as imagens das categorias:", erro);
+  });
 }
 
 // Escuta o banco de dados (Firestore) em tempo real: assim que um produto é
@@ -300,7 +307,7 @@ function renderizarProdutos() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  carregarDadosPublicos();
+  escutarImagensCategoriasEmTempoReal();
   montarCategorias();
   renderizarProdutos();
   escutarProdutosEmTempoReal();
@@ -579,6 +586,8 @@ document.addEventListener('DOMContentLoaded',()=>setTimeout(atualizarBannerAchad
 // Em celulares/tablets não existe "passar o mouse", então um toque na imagem
 // do produto abre a caixinha de detalhe; tocar em qualquer outro lugar fecha.
 document.addEventListener('click', (evento) => {
+  if (window.innerWidth <= 640) return; // no celular a caixinha fica desativada
+
   const imagemTocada = evento.target.closest('.product-image-wrap');
   const cardTocado = imagemTocada ? imagemTocada.closest('.product-card') : null;
 

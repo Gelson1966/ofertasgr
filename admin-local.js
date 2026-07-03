@@ -1,6 +1,6 @@
 import {
   db, auth,
-  collection, doc, setDoc, deleteDoc, onSnapshot,
+  collection, doc, setDoc, getDoc, deleteDoc, onSnapshot,
   signInWithEmailAndPassword, onAuthStateChanged, signOut
 } from "./firebase-config.js";
 
@@ -352,15 +352,27 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 
 
-const CAT_IMAGENS_KEY="ofertasgr_imagens_categorias_v1";
-
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded",async ()=>{
  const panel=document.getElementById("categoryImagesPanel");
  const saveBtn=document.getElementById("saveCategoryImages");
 
  if(!panel || typeof CATEGORIAS==="undefined") return;
 
- const saved=JSON.parse(localStorage.getItem(CAT_IMAGENS_KEY)||"{}");
+ // Carrega as imagens já salvas no Firestore (visíveis pra todos os
+ // visitantes do site, não só nesse navegador).
+ const salvas={};
+ try{
+   const snap=await new Promise((resolve,reject)=>{
+     const unsub=onSnapshot(collection(db,"categoriaImagens"), s=>{ unsub(); resolve(s); }, reject);
+   });
+   snap.docs.forEach(item=>{
+     const dados=item.data();
+     if(dados && dados.imagem) salvas[item.id]=dados.imagem;
+   });
+ }catch(erro){
+   console.error("Não foi possível carregar as imagens das categorias salvas:", erro);
+ }
+
  const pendentes={};
 
  panel.innerHTML=CATEGORIAS.map(c=>`
@@ -368,7 +380,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       <label style="display:block;font-weight:bold;margin-bottom:6px">${c.nome}</label>
       <input type="file" data-cat="${c.id}" accept="image/*">
       <div style="margin-top:8px">
-        <img id="preview-${c.id}" src="${saved[c.id]||""}" style="max-width:120px;max-height:80px;display:${saved[c.id]?"block":"none"}">
+        <img id="preview-${c.id}" src="${salvas[c.id]||""}" style="max-width:120px;max-height:80px;display:${salvas[c.id]?"block":"none"}">
       </div>
    </div>`).join("");
 
@@ -389,11 +401,26 @@ document.addEventListener("DOMContentLoaded",()=>{
  });
 
  if(saveBtn){
-   saveBtn.addEventListener("click",()=>{
-      const atual=JSON.parse(localStorage.getItem(CAT_IMAGENS_KEY)||"{}");
-      Object.assign(atual,pendentes);
-      localStorage.setItem(CAT_IMAGENS_KEY,JSON.stringify(atual));
-      alert("Imagens das categorias salvas com sucesso!");
+   saveBtn.addEventListener("click",async ()=>{
+      const categoriasPendentes=Object.keys(pendentes);
+      if(categoriasPendentes.length===0){
+        alert("Nenhuma imagem nova selecionada.");
+        return;
+      }
+      saveBtn.disabled=true;
+      saveBtn.textContent="Salvando...";
+      try{
+        await Promise.all(categoriasPendentes.map(catId =>
+          setDoc(doc(db,"categoriaImagens",catId), { imagem: pendentes[catId] })
+        ));
+        alert("Imagens das categorias salvas com sucesso! Já aparecem pra todos os visitantes do site.");
+      }catch(erro){
+        console.error("Erro ao salvar imagens das categorias:", erro);
+        alert("Não foi possível salvar as imagens. Tenta de novo em instantes.");
+      }finally{
+        saveBtn.disabled=false;
+        saveBtn.textContent="Salvar Imagens das Categorias";
+      }
    });
  }
 });
