@@ -1,0 +1,4 @@
+Coloque nesta pasta as imagens dos produtos exibidos no site.
+
+O painel administrativo local pode copiar as imagens para cá automaticamente
+em navegadores compatíveis, como Google Chrome e Microsoft Edge.
