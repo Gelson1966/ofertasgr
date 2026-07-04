@@ -182,16 +182,47 @@ function enviarImagem(file) {
       const img = new Image();
       img.onerror = () => reject(new Error("Arquivo de imagem inválido."));
       img.onload = () => {
-        const larguraMax = 700;
-        const escala = Math.min(1, larguraMax / img.width);
-        const largura = Math.round(img.width * escala);
-        const altura = Math.round(img.height * escala);
-        const canvas = document.createElement("canvas");
-        canvas.width = largura;
-        canvas.height = altura;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, largura, altura);
-        resolve(canvas.toDataURL("image/jpeg", 0.72));
+        const ehPng = file.type === "image/png" || /\.png$/i.test(file.name || "");
+        const LIMITE_BYTES = 900000; // margem de segurança abaixo do limite de 1MB do Firestore
+
+        function renderizar(larguraAlvo) {
+          const escala = Math.min(1, larguraAlvo / img.width);
+          const largura = Math.round(img.width * escala);
+          const altura = Math.round(img.height * escala);
+          const canvas = document.createElement("canvas");
+          canvas.width = largura;
+          canvas.height = altura;
+          const ctx = canvas.getContext("2d");
+          if (ehPng) {
+            // Mantém a transparência real do PNG.
+            ctx.clearRect(0, 0, largura, altura);
+            ctx.drawImage(img, 0, 0, largura, altura);
+            return canvas.toDataURL("image/png");
+          }
+          // Fotos comuns (JPEG) não têm transparência; preenche de branco
+          // por segurança e comprime para reduzir o tamanho do arquivo.
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, largura, altura);
+          ctx.drawImage(img, 0, 0, largura, altura);
+          return canvas.toDataURL("image/jpeg", 0.72);
+        }
+
+        let largura = 700;
+        let resultado = renderizar(largura);
+        // PNG não tem controle de "qualidade" como o JPEG, então se o
+        // arquivo ficar grande demais para o banco de dados, vai
+        // reduzindo o tamanho da imagem até caber.
+        let tentativas = 0;
+        while (ehPng && resultado.length > LIMITE_BYTES && tentativas < 4) {
+          largura = Math.round(largura * 0.7);
+          resultado = renderizar(largura);
+          tentativas++;
+        }
+        if (resultado.length > LIMITE_BYTES) {
+          reject(new Error("Essa imagem PNG é grande demais mesmo depois de reduzida. Tente uma versão mais simples ou em JPEG."));
+          return;
+        }
+        resolve(resultado);
       };
       img.src = leitor.result;
     };
