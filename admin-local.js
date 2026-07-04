@@ -385,18 +385,20 @@ document.addEventListener("DOMContentLoaded",async ()=>{
    </div>`).join("");
 
  panel.querySelectorAll("input[type=file]").forEach(inp=>{
-   inp.addEventListener("change",e=>{
+   inp.addEventListener("change",async e=>{
       const f=e.target.files[0];
       if(!f) return;
 
-      const r=new FileReader();
-      r.onload=ev=>{
-        pendentes[e.target.dataset.cat]=ev.target.result;
+      try{
+        const imagemComprimida = await enviarImagem(f);
+        pendentes[e.target.dataset.cat]=imagemComprimida;
         const p=document.getElementById("preview-"+e.target.dataset.cat);
-        p.src=ev.target.result;
+        p.src=imagemComprimida;
         p.style.display="block";
-      };
-      r.readAsDataURL(f);
+      }catch(erro){
+        console.error("Erro ao processar imagem da categoria:", erro);
+        alert("Não foi possível processar essa imagem. Tente outro arquivo.");
+      }
    });
  });
 
