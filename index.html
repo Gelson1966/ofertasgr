@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Ofertas pesquisadas e comparadas por Gelson Rodrigues nas principais lojas online.">
-  <title>Ofertas GR | Compare preços em Magalu, Mercado Livre e Shopee</title>
+  <title>Ofertas GR | Gelson Rodrigues</title>
   <link rel="icon" type="image/png" href="imagens/SIMBOLOS/logo-gr.png">
   <link rel="apple-touch-icon" href="imagens/SIMBOLOS/logo-gr.png">
   <link rel="canonical" href="https://ofertasgr.com/">
@@ -312,8 +312,11 @@
     }
     .product-card:hover { border-color: #bfd2f1; box-shadow: var(--shadow-hover); transform: translateY(-4px); overflow: visible; z-index: 5; }
 
-    /* Caixa de detalhes exibida ao passar o mouse no card */
+    /* Caixa de detalhes ao passar o mouse: DESATIVADA em todos os dispositivos */
     .product-detail-box {
+      display: none !important;
+    }
+    .product-detail-box-old-rules-unused {
       position: absolute;
       top: 0;
       left: calc(100% + 14px);
@@ -652,7 +655,7 @@ width:100%;
         <div class="section-header">
           <div class="title-block">
             <div class="title-row"><h2 id="sectionTitle">Ofertas em destaque</h2><span class="result-count" id="resultCount"></span></div>
-            <p id="sectionSubtitle">Encontre o melhor preço entre as lojas pesquisadas. <span class="hover-tip">💡 Passe o mouse na imagem do produto para ver mais informações.</span></p>
+            <p id="sectionSubtitle">Encontre o melhor preço entre as lojas pesquisadas.</p>
           </div>
         </div>
         <div id="productsArea"></div>
