@@ -513,22 +513,28 @@ let heroCarouselResizeObserver=null;
 function atualizarBannerAchadinhos(){
  const box=document.getElementById('heroDeals');
  if(!box) return;
- const itens=(typeof listaFiltrada==='function'
-   ? (()=>{ const atual=categoriaAtiva; categoriaAtiva='melhores'; const r=listaFiltrada(); categoriaAtiva=atual; return r; })()
-   : produtos);
- if(!itens.length) return;
+ if(!produtos || !produtos.length) return;
 
  const hoje=new Date().toISOString().slice(0,10);
- const QTD=Math.min(8, itens.length);
+ const POR_CATEGORIA=4;
  let escolhidos=[];
+
  try{
    const salvo=JSON.parse(localStorage.getItem('bannerAchadinhosDia')||'null');
    if(salvo && salvo.data===hoje){
-      escolhidos=salvo.itens.map(n=>itens.find(p=>p.nome===n)).filter(Boolean);
+      escolhidos=salvo.itens.map(n=>produtos.find(p=>p.nome===n)).filter(Boolean);
    }
  }catch(e){}
- if(escolhidos.length<QTD){
-   escolhidos=[...itens].sort(()=>Math.random()-0.5).slice(0,QTD);
+
+ if(!escolhidos.length){
+   CATEGORIAS.forEach(cat=>{
+     if(cat.id==='pedido-cliente') return;
+     const itensCategoria=produtos.filter(p=>p.categoria===cat.id && dadosDasLojas(p).length);
+     if(!itensCategoria.length) return;
+     const sorteados=[...itensCategoria].sort(()=>Math.random()-0.5).slice(0,POR_CATEGORIA);
+     escolhidos.push(...sorteados);
+   });
+   escolhidos=escolhidos.sort(()=>Math.random()-0.5);
    try{localStorage.setItem('bannerAchadinhosDia',JSON.stringify({data:hoje,itens:escolhidos.map(p=>p.nome)}));}catch(e){}
  }
 
