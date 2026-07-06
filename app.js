@@ -505,6 +505,10 @@ function atualizarBannerAchadinhos(){
 
  let index=0;
  const GAP=14;
+ let isDragging=false;
+ let dragStartX=0;
+ let dragDeltaX=0;
+ let dragCardW=0;
 
  function visivelPorVez(){
    const w=window.innerWidth;
@@ -563,9 +567,86 @@ function atualizarBannerAchadinhos(){
    }
  }
 
- heroCarouselTimer=setInterval(avancar, 2800);
- viewport.addEventListener('mouseenter', ()=>clearInterval(heroCarouselTimer));
- viewport.addEventListener('mouseleave', ()=>{ heroCarouselTimer=setInterval(avancar,2800); });
+ function pausarAuto(){
+   clearInterval(heroCarouselTimer);
+ }
+ function retomarAuto(){
+   clearInterval(heroCarouselTimer);
+   heroCarouselTimer=setInterval(avancar, 2800);
+ }
+
+ function voltar(){
+   index=Math.max(0, index-1);
+   irPara(index, true);
+   atualizarDots();
+ }
+
+ retomarAuto();
+ viewport.addEventListener('mouseenter', pausarAuto);
+ viewport.addEventListener('mouseleave', retomarAuto);
+
+ // --- Navegação manual: arraste com mouse e toque (PC, tablet e celular) ---
+ viewport.style.cursor='grab';
+ viewport.style.touchAction='pan-y';
+ viewport.style.userSelect='none';
+
+ function posX(e){
+   return (e.touches && e.touches.length) ? e.touches[0].clientX : e.clientX;
+ }
+
+ function iniciarArraste(e){
+   isDragging=true;
+   dragStartX=posX(e);
+   dragDeltaX=0;
+   dragCardW=aplicarLargura();
+   track.style.transition='none';
+   viewport.style.cursor='grabbing';
+   pausarAuto();
+ }
+
+ function moverArraste(e){
+   if(!isDragging) return;
+   dragDeltaX=posX(e)-dragStartX;
+   const base=-(index*(dragCardW+GAP));
+   track.style.transform=`translateX(${base+dragDeltaX}px)`;
+   if(e.cancelable) e.preventDefault();
+ }
+
+ function finalizarArraste(){
+   if(!isDragging) return;
+   isDragging=false;
+   viewport.style.cursor='grab';
+   const limiar=dragCardW*0.18;
+   if(dragDeltaX<=-limiar){
+     avancar();
+   }else if(dragDeltaX>=limiar){
+     voltar();
+   }else{
+     irPara(index,true);
+   }
+   dragDeltaX=0;
+   setTimeout(retomarAuto,1500);
+ }
+
+ viewport.addEventListener('mousedown', iniciarArraste);
+ window.addEventListener('mousemove', moverArraste);
+ window.addEventListener('mouseup', finalizarArraste);
+
+ viewport.addEventListener('touchstart', iniciarArraste, {passive:true});
+ viewport.addEventListener('touchmove', moverArraste, {passive:false});
+ viewport.addEventListener('touchend', finalizarArraste);
+ viewport.addEventListener('touchcancel', finalizarArraste);
+
+ dots.forEach((d,i)=>{
+   d.style.cursor='pointer';
+   d.addEventListener('click', ()=>{
+     pausarAuto();
+     index=i;
+     irPara(index,true);
+     atualizarDots();
+     setTimeout(retomarAuto,1500);
+   });
+ });
 
  let resizeTO;
  heroCarouselResizeHandler=()=>{
