@@ -207,7 +207,7 @@ function atualizarCabecalho(lista) {
       ? categoria.nome
       : "Todos os Produtos";
 
-  const dicaHover = '<span class="hover-tip">💡 Passe o mouse na imagem do produto para ver mais informações.</span>';
+  const dicaHover = "";
   document.getElementById("sectionTitle").textContent = titulo;
   document.getElementById("sectionSubtitle").innerHTML = buscaAtiva
     ? `Produtos encontrados para “${document.getElementById("searchInput").value.trim()}”.`
