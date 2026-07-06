@@ -228,6 +228,58 @@ function scrollParaResultados(){
   const y=alvo.getBoundingClientRect().top+window.pageYOffset-offset;
   window.scrollTo({top:y,behavior:'smooth'});
 }
+function injetarDadosEstruturados(lista) {
+  const ID = 'structured-data-produtos';
+  let script = document.getElementById(ID);
+  if (!lista || !lista.length) {
+    if (script) script.remove();
+    return;
+  }
+
+  const itens = lista.slice(0, 20).map((produto, i) => {
+    const lojas = dadosDasLojas(produto);
+    const precosNumericos = lojas.map(l => Number(l.dados.preco)).filter(Number.isFinite);
+    const menorPreco = precosNumericos.length ? Math.min(...precosNumericos) : null;
+    const lojaMenorPreco = lojas.find(l => Number(l.dados.preco) === menorPreco);
+    let imagemAbsoluta;
+    try {
+      imagemAbsoluta = produto.imagem ? new URL(produto.imagem, window.location.origin).href : undefined;
+    } catch (e) { imagemAbsoluta = undefined; }
+
+    const product = {
+      "@type": "Product",
+      "name": produto.nome,
+      ...(produto.marca ? { "brand": { "@type": "Brand", "name": produto.marca } } : {}),
+      ...(imagemAbsoluta ? { "image": imagemAbsoluta } : {}),
+      ...(menorPreco !== null ? {
+        "offers": {
+          "@type": "Offer",
+          "priceCurrency": "BRL",
+          "price": menorPreco,
+          "availability": "https://schema.org/InStock",
+          "url": (lojaMenorPreco && lojaMenorPreco.dados.link) || "https://ofertasgr.com/"
+        }
+      } : {})
+    };
+
+    return { "@type": "ListItem", "position": i + 1, "item": product };
+  });
+
+  const dados = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": itens
+  };
+
+  if (!script) {
+    script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = ID;
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(dados);
+}
+
 function renderizarProdutos() {
   const area = document.getElementById("productsArea");
   const lista = listaFiltrada().sort((a, b) => {
@@ -238,6 +290,7 @@ function renderizarProdutos() {
     return (a.nome || "").localeCompare((b.nome || ""), "pt-BR", { sensitivity: "base" });
   });
   atualizarCabecalho(lista);
+  injetarDadosEstruturados(lista);
 
   if (!lista.length) {
     area.innerHTML = `
