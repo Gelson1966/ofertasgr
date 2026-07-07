@@ -121,9 +121,13 @@ async function deleteProduct(id) {
 function renderTable() {
   const search = $("search").value.trim().toLocaleLowerCase("pt-BR");
   const category = $("categoryFilter").value;
+  const subcategory = $("subcategoryFilter").value.trim().toLocaleLowerCase("pt-BR");
   const list = adminProducts.filter(product => {
     const text = `${product.marca || ""} ${product.nome || ""} ${product.subcategoria || ""}`.toLocaleLowerCase("pt-BR");
-    return (!category || product.categoria === category) && text.includes(search);
+    const subcategoriaProduto = (product.subcategoria || "").toLocaleLowerCase("pt-BR");
+    return (!category || product.categoria === category)
+      && (!subcategory || subcategoriaProduto.includes(subcategory))
+      && text.includes(search);
   }).sort((a,b)=>{
     const cat=(a.categoria||"").localeCompare((b.categoria||""),"pt-BR",{sensitivity:"base"});
     if(cat) return cat;
@@ -331,6 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("cancelButton").addEventListener("click", resetForm);
   $("search").addEventListener("input", renderTable);
   $("categoryFilter").addEventListener("change", renderTable);
+  $("subcategoryFilter").addEventListener("input", renderTable);
   $("backupButton").addEventListener("click", exportBackup);
   $("importButton").addEventListener("click", () => $("importFile").click());
   $("importFile").addEventListener("change", event => {
