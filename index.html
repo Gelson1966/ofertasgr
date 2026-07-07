@@ -19,23 +19,6 @@
   <meta name="twitter:title" content="Ofertas GR | Compare preços em Magalu, Mercado Livre e Shopee">
   <meta name="twitter:description" content="Ofertas pesquisadas e comparadas por Gelson Rodrigues nas principais lojas online.">
   <meta name="twitter:image" content="https://ofertasgr.com/imagens/SIMBOLOS/logo-gr.png">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Ofertas GR",
-    "url": "https://ofertasgr.com/",
-    "logo": "https://ofertasgr.com/imagens/SIMBOLOS/logo-gr.png"
-  }
-  </script>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Ofertas GR",
-    "url": "https://ofertasgr.com/"
-  }
-  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
@@ -263,7 +246,7 @@
     .hero-carousel-track { display: flex; gap: 14px; }
     .hero-carousel-dots { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
     .hero-carousel-dots span { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.35); transition: .3s ease; display:block; }
-    .hero-carousel-dots span.active { background: #fff; }
+    .hero-carousel-dots span.active { background: #fff; width: 18px; border-radius: 4px; }
     .visual-card {
       flex: 0 0 auto;
       padding: 20px 20px 4px 20px;
@@ -329,11 +312,8 @@
     }
     .product-card:hover { border-color: #bfd2f1; box-shadow: var(--shadow-hover); transform: translateY(-4px); overflow: visible; z-index: 5; }
 
-    /* Caixa de detalhes ao passar o mouse: DESATIVADA em todos os dispositivos */
+    /* Caixa de detalhes exibida ao passar o mouse no card */
     .product-detail-box {
-      display: none !important;
-    }
-    .product-detail-box-old-rules-unused {
       position: absolute;
       top: 0;
       left: calc(100% + 14px);
@@ -643,7 +623,7 @@ width:100%;
     <div class="container">
       <section class="hero">
 <div class="hero-content">
-<span class="eyebrow">🔥 Atualizado todos os dias</span>
+<span class="eyebrow">🏆 Melhores Ofertas do Dia</span>
 <h1>Menores preços encontrados para você</h1>
 <div class="hero-visual"><div id="heroDeals" style="width:100%;"></div></div>
 <p style="text-align:center;">Selecionamos os menores preços entre Magalu, Mercado Livre e Shopee.</p>
@@ -672,7 +652,7 @@ width:100%;
         <div class="section-header">
           <div class="title-block">
             <div class="title-row"><h2 id="sectionTitle">Ofertas em destaque</h2><span class="result-count" id="resultCount"></span></div>
-            <p id="sectionSubtitle">Encontre o melhor preço entre as lojas pesquisadas.</p>
+            <p id="sectionSubtitle">Encontre o melhor preço entre as lojas pesquisadas. <span class="hover-tip">💡 Passe o mouse na imagem do produto para ver mais informações.</span></p>
           </div>
         </div>
         <div id="productsArea"></div>
@@ -803,6 +783,7 @@ reset();
       </div>
     </div>
   <div class="footer-disclaimer"><div class="shield-icon"><svg width="42" height="42" viewBox="0 0 24 24" fill="none"><path d="M12 2l7 3v6c0 5-3.5 9.5-7 11-3.5-1.5-7-6-7-11V5l7-3z" stroke="#7ec3ff" stroke-width="2"/><path d="M8.5 12.5l2.2 2.2 4.8-5.2" stroke="#7ec3ff" stroke-width="2" fill="none"/></svg></div><div><span class="label">Transparência:</span> Os preços podem mudar; confirme o valor final no site da loja.</div></div>
+  <div class="footer-disclaimer"><div class="shield-icon"><svg width="42" height="42" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#7ec3ff" stroke-width="2"/><path d="M12 7v5l3.5 2" stroke="#7ec3ff" stroke-width="2" stroke-linecap="round"/></svg></div><div><span class="label">Atualizações:</span> Os produtos e preços são atualizados de segunda a sexta-feira.</div></div>
 </footer>
 
 <style>
