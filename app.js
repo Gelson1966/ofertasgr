@@ -531,23 +531,47 @@ let heroCarouselTimer=null;
 let heroCarouselResizeHandler=null;
 let heroCarouselResizeObserver=null;
 
+// Gera um número "aleatório" que é sempre o mesmo para a mesma semente (seed).
+// Assim, usando a data como semente, TODOS os visitantes veem o mesmo sorteio
+// no mesmo dia, e o sorteio muda sozinho quando o dia (local) vira — sem
+// depender de localStorage nem de cache do navegador.
+function criarGeradorComSemente(semente) {
+  let estado = 0;
+  for (let i = 0; i < semente.length; i++) {
+    estado = (estado * 31 + semente.charCodeAt(i)) >>> 0;
+  }
+  return function () {
+    estado |= 0; estado = (estado + 0x6D2B79F5) | 0;
+    let t = Math.imul(estado ^ (estado >>> 15), 1 | estado);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Embaralha um array de forma determinística usando o gerador acima
+// (substitui o antigo `.sort(() => Math.random() - 0.5)`).
+function embaralharComSemente(lista, aleatorio) {
+  const copia = [...lista];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(aleatorio() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+  return copia;
+}
+
 function atualizarBannerAchadinhos(){
  const box=document.getElementById('heroDeals');
  if(!box) return;
  if(!produtos || !produtos.length) return;
 
- const hoje=new Date().toISOString().slice(0,10);
+ // Data local (não UTC), para a virada acontecer na meia-noite daqui.
+ const agora=new Date();
+ const hoje=`${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,'0')}-${String(agora.getDate()).padStart(2,'0')}`;
+ const aleatorioDoDia=criarGeradorComSemente(hoje);
  const POR_CATEGORIA=4;
  let escolhidos=[];
 
- try{
-   const salvo=JSON.parse(localStorage.getItem('bannerAchadinhosDia_v2')||'null');
-   if(salvo && salvo.data===hoje){
-      escolhidos=salvo.itens.map(n=>produtos.find(p=>p.nome===n)).filter(Boolean);
-   }
- }catch(e){}
-
- if(!escolhidos.length){
+ {
    // O banner agora usa a MESMA lista de "Melhores Achadinhos do Site"
    // exibida na página de achadinhos, em vez de sortear produtos
    // aleatórios de qualquer categoria.
@@ -566,8 +590,8 @@ function atualizarBannerAchadinhos(){
        porSubcategoria[sub].push(p);
      });
 
-     const subcategorias=Object.keys(porSubcategoria).sort(()=>Math.random()-0.5);
-     subcategorias.forEach(sub=>porSubcategoria[sub].sort(()=>Math.random()-0.5));
+     const subcategorias=embaralharComSemente(Object.keys(porSubcategoria), aleatorioDoDia);
+     subcategorias.forEach(sub=>{ porSubcategoria[sub]=embaralharComSemente(porSubcategoria[sub], aleatorioDoDia); });
 
      const selecionados=[];
      const usados=new Set();
@@ -582,7 +606,7 @@ function atualizarBannerAchadinhos(){
      // 2ª passada: se a categoria tiver menos de 4 subcategorias diferentes,
      // completa com os produtos restantes (evitando repetir o mesmo produto)
      if(selecionados.length<POR_CATEGORIA){
-       const restantes=itensCategoria.filter(p=>!usados.has(p.nome)).sort(()=>Math.random()-0.5);
+       const restantes=embaralharComSemente(itensCategoria.filter(p=>!usados.has(p.nome)), aleatorioDoDia);
        for(const produto of restantes){
          if(selecionados.length>=POR_CATEGORIA) break;
          selecionados.push(produto);
@@ -592,8 +616,7 @@ function atualizarBannerAchadinhos(){
 
      escolhidos.push(...selecionados);
    });
-   escolhidos=escolhidos.sort(()=>Math.random()-0.5);
-   try{localStorage.setItem('bannerAchadinhosDia_v2',JSON.stringify({data:hoje,itens:escolhidos.map(p=>p.nome)}));}catch(e){}
+   escolhidos=embaralharComSemente(escolhidos, aleatorioDoDia);
  }
 
  const cardsHTML=escolhidos.map(construirCardAchadinho).filter(Boolean);
