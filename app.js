@@ -167,6 +167,19 @@ function criarCard(produto) {
     </article>`;
 }
 
+// Normaliza texto para comparar subcategorias sem se confundir com
+// diferenças de maiúsculas/minúsculas, espaços extras ou acentuação
+// (ex.: "Depurador de Ar" e "depurador de ar " são a mesma coisa).
+function normalizarChave(texto) {
+  return (texto || "")
+    .toString()
+    .trim()
+    .toLocaleLowerCase("pt-BR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
 // Retorna a lista de "Melhores Achadinhos do Site": um produto por
 // subcategoria (o de menor preço), reunidos de todas as categorias.
 // Essa é a MESMA lista que aparece na página de Achadinhos, e agora
@@ -178,7 +191,7 @@ function obterMelhoresAchadinhos() {
     const itensCategoria = produtos.filter(p => p.categoria === cat.id);
     const grupos = {};
     itensCategoria.forEach(p=>{
-      const chave=(p.subcategoria || p.nome || "Outros").trim();
+      const chave=normalizarChave(p.subcategoria || p.nome || "Outros");
       if(!grupos[chave]) grupos[chave]=[];
       grupos[chave].push(p);
     });
