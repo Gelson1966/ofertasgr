@@ -167,28 +167,36 @@ function criarCard(produto) {
     </article>`;
 }
 
+// Retorna a lista de "Melhores Achadinhos do Site": um produto por
+// subcategoria (o de menor preço), reunidos de todas as categorias.
+// Essa é a MESMA lista que aparece na página de Achadinhos, e agora
+// também é a fonte usada pelo banner (hero) para garantir consistência.
+function obterMelhoresAchadinhos() {
+  const melhores = [];
+  CATEGORIAS.forEach(cat => {
+    if(cat.id==="pedido-cliente") return;
+    const itensCategoria = produtos.filter(p => p.categoria === cat.id);
+    const grupos = {};
+    itensCategoria.forEach(p=>{
+      const chave=(p.subcategoria || p.nome || "Outros").trim();
+      if(!grupos[chave]) grupos[chave]=[];
+      grupos[chave].push(p);
+    });
+    Object.values(grupos).forEach(itens=>{
+      itens.sort((a,b)=>{
+        const pa=Math.min(...dadosDasLojas(a).map(l=>Number(l.dados.preco)||999999));
+        const pb=Math.min(...dadosDasLojas(b).map(l=>Number(l.dados.preco)||999999));
+        return pa-pb;
+      });
+      melhores.push(itens[0]);
+    });
+  });
+  return melhores;
+}
+
 function listaFiltrada() {
   if (categoriaAtiva === "melhores") {
-    const melhores = [];
-    CATEGORIAS.forEach(cat => {
-      if(cat.id==="pedido-cliente") return;
-      const itensCategoria = produtos.filter(p => p.categoria === cat.id);
-      const grupos = {};
-      itensCategoria.forEach(p=>{
-        const chave=(p.subcategoria || p.nome || "Outros").trim();
-        if(!grupos[chave]) grupos[chave]=[];
-        grupos[chave].push(p);
-      });
-      Object.values(grupos).forEach(itens=>{
-        itens.sort((a,b)=>{
-          const pa=Math.min(...dadosDasLojas(a).map(l=>Number(l.dados.preco)||999999));
-          const pb=Math.min(...dadosDasLojas(b).map(l=>Number(l.dados.preco)||999999));
-          return pa-pb;
-        });
-        melhores.push(itens[0]);
-      });
-    });
-    return melhores;
+    return obterMelhoresAchadinhos();
   }
   return produtos.filter(produto => {
     const correspondeCategoria = categoriaAtiva === "todas" ? produto.categoria !== "pedido-cliente" : produto.categoria === categoriaAtiva;
@@ -527,9 +535,13 @@ function atualizarBannerAchadinhos(){
  }catch(e){}
 
  if(!escolhidos.length){
+   // O banner agora usa a MESMA lista de "Melhores Achadinhos do Site"
+   // exibida na página de achadinhos, em vez de sortear produtos
+   // aleatórios de qualquer categoria.
+   const achadinhos=obterMelhoresAchadinhos();
    CATEGORIAS.forEach(cat=>{
      if(cat.id==='pedido-cliente') return;
-     const itensCategoria=produtos.filter(p=>p.categoria===cat.id && dadosDasLojas(p).length);
+     const itensCategoria=achadinhos.filter(p=>p.categoria===cat.id && dadosDasLojas(p).length);
      if(!itensCategoria.length) return;
 
      // Agrupa os produtos por subcategoria (ex.: "Ferro de Passar", "Cafeteira")
