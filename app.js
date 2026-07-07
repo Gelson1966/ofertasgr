@@ -528,7 +528,7 @@ function atualizarBannerAchadinhos(){
  let escolhidos=[];
 
  try{
-   const salvo=JSON.parse(localStorage.getItem('bannerAchadinhosDia')||'null');
+   const salvo=JSON.parse(localStorage.getItem('bannerAchadinhosDia_v2')||'null');
    if(salvo && salvo.data===hoje){
       escolhidos=salvo.itens.map(n=>produtos.find(p=>p.nome===n)).filter(Boolean);
    }
@@ -580,7 +580,7 @@ function atualizarBannerAchadinhos(){
      escolhidos.push(...selecionados);
    });
    escolhidos=escolhidos.sort(()=>Math.random()-0.5);
-   try{localStorage.setItem('bannerAchadinhosDia',JSON.stringify({data:hoje,itens:escolhidos.map(p=>p.nome)}));}catch(e){}
+   try{localStorage.setItem('bannerAchadinhosDia_v2',JSON.stringify({data:hoje,itens:escolhidos.map(p=>p.nome)}));}catch(e){}
  }
 
  const cardsHTML=escolhidos.map(construirCardAchadinho).filter(Boolean);
