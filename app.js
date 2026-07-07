@@ -531,8 +531,41 @@ function atualizarBannerAchadinhos(){
      if(cat.id==='pedido-cliente') return;
      const itensCategoria=produtos.filter(p=>p.categoria===cat.id && dadosDasLojas(p).length);
      if(!itensCategoria.length) return;
-     const sorteados=[...itensCategoria].sort(()=>Math.random()-0.5).slice(0,POR_CATEGORIA);
-     escolhidos.push(...sorteados);
+
+     // Agrupa os produtos por subcategoria (ex.: "Ferro de Passar", "Cafeteira")
+     // para não sortear dois produtos do mesmo tipo dentro da mesma categoria.
+     const porSubcategoria={};
+     itensCategoria.forEach(p=>{
+       const sub=p.subcategoria||'outros';
+       if(!porSubcategoria[sub]) porSubcategoria[sub]=[];
+       porSubcategoria[sub].push(p);
+     });
+
+     const subcategorias=Object.keys(porSubcategoria).sort(()=>Math.random()-0.5);
+     subcategorias.forEach(sub=>porSubcategoria[sub].sort(()=>Math.random()-0.5));
+
+     const selecionados=[];
+     const usados=new Set();
+
+     // 1ª passada: no máximo 1 produto de cada subcategoria diferente
+     for(const sub of subcategorias){
+       if(selecionados.length>=POR_CATEGORIA) break;
+       const produto=porSubcategoria[sub].find(p=>!usados.has(p.nome));
+       if(produto){ selecionados.push(produto); usados.add(produto.nome); }
+     }
+
+     // 2ª passada: se a categoria tiver menos de 4 subcategorias diferentes,
+     // completa com os produtos restantes (evitando repetir o mesmo produto)
+     if(selecionados.length<POR_CATEGORIA){
+       const restantes=itensCategoria.filter(p=>!usados.has(p.nome)).sort(()=>Math.random()-0.5);
+       for(const produto of restantes){
+         if(selecionados.length>=POR_CATEGORIA) break;
+         selecionados.push(produto);
+         usados.add(produto.nome);
+       }
+     }
+
+     escolhidos.push(...selecionados);
    });
    escolhidos=escolhidos.sort(()=>Math.random()-0.5);
    try{localStorage.setItem('bannerAchadinhosDia',JSON.stringify({data:hoje,itens:escolhidos.map(p=>p.nome)}));}catch(e){}
