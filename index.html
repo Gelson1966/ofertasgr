@@ -433,7 +433,19 @@
     }
     .product-body { display: flex; flex: 1; flex-direction: column; padding: 16px; }
     .product-brand { display:block; margin-top:12px; color:var(--navy); font-size:18px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; text-align:left; }
-    .product-name { min-height: 42px; margin: 6px 0 14px; color: var(--text); font-size: 15px; font-weight: 650; line-height: 1.45; }
+    .product-name {
+      height: 65px;
+      margin: 6px 0 14px;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 650;
+      line-height: 1.45;
+      text-align: center;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
     .price-list { display: grid; gap: 7px; margin-bottom: 13px; }
     .price-item {
       display: flex;
@@ -520,7 +532,17 @@
       .best-badge { margin: 10px 8px 0; padding: 5px 6px; border-radius: 6px; font-size: 10px; }
       .product-body { padding: 10px; }
       .product-brand { margin-top: 4px; font-size: 11px; letter-spacing: .04em; }
-      .product-name { min-height: 30px; margin: 4px 0 8px; font-size: 12px; line-height: 1.35; }
+      .product-name {
+        height: 49px;
+        margin: 4px 0 8px;
+        font-size: 12px;
+        line-height: 1.35;
+        text-align: center;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
       .price-list { gap: 5px; margin-bottom: 8px; }
       .price-item { min-height: 28px; padding: 4px 7px; border-radius: 8px; font-size: 10px; }
       .price-value { font-size: 13px; }
