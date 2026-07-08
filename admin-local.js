@@ -58,7 +58,8 @@ function productFromForm() {
     imagem: $("currentImage").value,
     magalu: store("magaluPrice", "magaluLink"),
     ml: store("mlPrice", "mlLink"),
-    shopee: store("shopeePrice", "shopeeLink")
+    shopee: store("shopeePrice", "shopeeLink"),
+    amazon: store("amazonPrice", "amazonLink")
   };
 }
 
@@ -100,6 +101,8 @@ function editProduct(id) {
   $("mlLink").value = product.ml?.link || "";
   $("shopeePrice").value = product.shopee?.preco ?? "";
   $("shopeeLink").value = product.shopee?.link || "";
+  $("amazonPrice").value = product.amazon?.preco ?? "";
+  $("amazonLink").value = product.amazon?.link || "";
   $("formTitle").textContent = "Editar produto";
   $("saveButton").textContent = "Salvar alterações";
   $("cancelButton").classList.remove("hidden");
@@ -150,12 +153,13 @@ function renderTable() {
       <td>${price(product.magalu?.preco)}</td>
       <td>${price(product.ml?.preco)}</td>
       <td>${price(product.shopee?.preco)}</td>
+      <td>${price(product.amazon?.preco)}</td>
       <td><div class="row-actions">
         <button class="btn" data-edit="${product.id}">Editar</button>
         <button class="btn btn-danger" data-delete="${product.id}">Excluir</button>
       </div></td>
     </tr>`;
-  }).join("") : `<tr><td colspan="7" style="padding:30px;text-align:left;color:#69758a">Nenhum produto encontrado.</td></tr>`;
+  }).join("") : `<tr><td colspan="8" style="padding:30px;text-align:left;color:#69758a">Nenhum produto encontrado.</td></tr>`;
 
   $("tableBody").querySelectorAll("[data-edit]").forEach(button =>
     button.addEventListener("click", () => editProduct(button.dataset.edit)));

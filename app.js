@@ -107,7 +107,8 @@ function dadosDasLojas(produto) {
   return [
     { nome: "Magalu", classe: "store-magalu", dados: produto.magalu },
     { nome: "Mercado Livre", classe: "store-ml", dados: produto.ml },
-    { nome: "Shopee", classe: "store-shopee", dados: produto.shopee }
+    { nome: "Shopee", classe: "store-shopee", dados: produto.shopee },
+    { nome: "Amazon", classe: "store-amazon", dados: produto.amazon }
   ].filter(loja => loja.dados && loja.dados.preco !== null && loja.dados.preco !== "");
 }
 
@@ -523,7 +524,7 @@ function construirCardAchadinho(prod){
   return `<a class="visual-card" href="${melhor.dados.link||'#'}" target="_blank" rel="noopener sponsored" style="text-decoration:none;color:inherit">
 <div class="visual-top">${img?'<img src="'+img+'" style="width:100%;height:80px;object-fit:contain">':'📸'}</div>
 <div style="font-size:13px;font-weight:700;color:#25324a">${prod.nome}</div>
-<div class="visual-price"><strong style="color:#0a9d4a;font-size:20px">${formatarPreco(melhor.dados.preco)}</strong><span style="display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;background:${melhor.nome==='Magalu'?'#0086FF':(melhor.nome==='Mercado Livre'?'#FFE600':'#EE4D2D')};color:${melhor.nome==='Mercado Livre'?'#000':'#fff'}">${melhor.nome}</span></div>
+<div class="visual-price"><strong style="color:#0a9d4a;font-size:20px">${formatarPreco(melhor.dados.preco)}</strong><span style="display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;background:${melhor.nome==='Magalu'?'#0086FF':(melhor.nome==='Mercado Livre'?'#FFE600':(melhor.nome==='Shopee'?'#EE4D2D':'#FF9900'))};color:${melhor.nome==='Mercado Livre'?'#000':'#fff'}">${melhor.nome}</span></div>
 </a>`;
 }
 
