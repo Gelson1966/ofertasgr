@@ -150,10 +150,10 @@ function renderTable() {
       <td>${thumb}</td>
       <td>${categoryName}<br><small>${product.subcategoria || ""}</small></td>
       <td class="product-title"><strong>${product.marca || ""}</strong><span>${product.nome || ""}</span></td>
+      <td>${price(product.amazon?.preco)}</td>
       <td>${price(product.magalu?.preco)}</td>
       <td>${price(product.ml?.preco)}</td>
       <td>${price(product.shopee?.preco)}</td>
-      <td>${price(product.amazon?.preco)}</td>
       <td><div class="row-actions">
         <button class="btn" data-edit="${product.id}">Editar</button>
         <button class="btn btn-danger" data-delete="${product.id}">Excluir</button>
