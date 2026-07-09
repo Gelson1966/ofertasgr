@@ -581,6 +581,15 @@ function atualizarBannerAchadinhos(){
  const POR_CATEGORIA=4;
  let escolhidos=[];
 
+ // Número inteiro que aumenta 1 a cada dia (dia 0, dia 1, dia 2...).
+ // É usado para GIRAR a lista de produtos a cada dia, em vez de sortear
+ // aleatoriamente. Isso garante que o mesmo produto só volta a aparecer
+ // depois de passar pela vez de todos os outros da mesma subcategoria —
+ // ou seja, nunca se repete de um dia para o outro (a menos que só exista
+ // 1 produto naquela subcategoria, aí não tem outro pra variar).
+ const [anoDoDia, mesDoDia, diaDoDia] = hoje.split('-').map(Number);
+ const diaIndex = Math.floor(Date.UTC(anoDoDia, mesDoDia - 1, diaDoDia) / 86400000);
+
  {
    // O banner agora usa a MESMA lista de "Melhores Achadinhos do Site"
    // exibida na página de achadinhos, em vez de sortear produtos
@@ -600,32 +609,53 @@ function atualizarBannerAchadinhos(){
        porSubcategoria[sub].push(p);
      });
 
-     const subcategorias=embaralharComSemente(Object.keys(porSubcategoria), aleatorioDoDia);
-     subcategorias.forEach(sub=>{ porSubcategoria[sub]=embaralharComSemente(porSubcategoria[sub], aleatorioDoDia); });
+     // Ordem ESTÁVEL (sempre a mesma, não sorteada) das subcategorias e dos
+     // produtos dentro delas. É a partir dessa ordem fixa que giramos o
+     // índice a cada dia — se a ordem mudasse toda hora, a rotação perderia
+     // a garantia de não repetir.
+     const subcategorias = Object.keys(porSubcategoria).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+     subcategorias.forEach(sub=>{
+       porSubcategoria[sub].sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
+     });
 
      const selecionados=[];
      const usados=new Set();
 
-     // 1ª passada: no máximo 1 produto de cada subcategoria diferente
+     // 1ª passada: 1 produto por subcategoria, girando o índice do produto
+     // dentro da subcategoria a cada dia (dia 0 pega o produto 0, dia 1 pega
+     // o produto 1, e assim por diante, voltando ao início quando acabar).
      for(const sub of subcategorias){
        if(selecionados.length>=POR_CATEGORIA) break;
-       const produto=porSubcategoria[sub].find(p=>!usados.has(p.nome));
+       const lista=porSubcategoria[sub];
+       const indiceInicial = diaIndex % lista.length;
+       let produto=null;
+       for(let k=0;k<lista.length;k++){
+         const candidato=lista[(indiceInicial+k)%lista.length];
+         if(!usados.has(candidato.nome)){ produto=candidato; break; }
+       }
        if(produto){ selecionados.push(produto); usados.add(produto.nome); }
      }
 
      // 2ª passada: se a categoria tiver menos de 4 subcategorias diferentes,
-     // completa com os produtos restantes (evitando repetir o mesmo produto)
+     // completa com os produtos restantes, também girando a cada dia
+     // (evitando repetir o mesmo produto).
      if(selecionados.length<POR_CATEGORIA){
-       const restantes=embaralharComSemente(itensCategoria.filter(p=>!usados.has(p.nome)), aleatorioDoDia);
-       for(const produto of restantes){
-         if(selecionados.length>=POR_CATEGORIA) break;
-         selecionados.push(produto);
-         usados.add(produto.nome);
+       const restantes=itensCategoria
+         .filter(p=>!usados.has(p.nome))
+         .sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
+       if(restantes.length){
+         const indiceInicial = diaIndex % restantes.length;
+         for(let k=0;k<restantes.length && selecionados.length<POR_CATEGORIA;k++){
+           const produto=restantes[(indiceInicial+k)%restantes.length];
+           if(!usados.has(produto.nome)){ selecionados.push(produto); usados.add(produto.nome); }
+         }
        }
      }
 
      escolhidos.push(...selecionados);
    });
+   // A ORDEM de exibição no carrossel (visual) pode continuar sorteada —
+   // isso não muda QUAIS produtos foram escolhidos, só a ordem deles na tela.
    escolhidos=embaralharComSemente(escolhidos, aleatorioDoDia);
  }
 
