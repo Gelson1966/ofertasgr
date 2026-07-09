@@ -523,10 +523,17 @@ function construirCardAchadinho(prod){
   if(!lojas.length) return '';
   let melhor=lojas.reduce((a,b)=>Number(a.dados.preco)<=Number(b.dados.preco)?a:b);
   const img=prod.imagem||prod.foto||'';
+  const CORES_LOJA = {
+    'Magalu': { bg: '#0086FF', cor: '#fff' },
+    'Mercado Livre': { bg: '#FFE600', cor: '#000' },
+    'Shopee': { bg: '#EE4D2D', cor: '#fff' },
+    'Amazon': { bg: '#131921', cor: '#FF9900' }
+  };
+  const estiloLoja = CORES_LOJA[melhor.nome] || { bg: '#EE4D2D', cor: '#fff' };
   return `<a class="visual-card" href="${melhor.dados.link||'#'}" target="_blank" rel="noopener sponsored" style="text-decoration:none;color:inherit">
 <div class="visual-top">${img?'<img src="'+img+'" style="width:100%;height:80px;object-fit:contain">':'📸'}</div>
 <div style="font-size:13px;font-weight:700;color:#25324a">${prod.nome}</div>
-<div class="visual-price"><strong style="color:#0a9d4a;font-size:20px">${formatarPreco(melhor.dados.preco)}</strong><span style="display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;background:${melhor.nome==='Magalu'?'#0086FF':(melhor.nome==='Mercado Livre'?'#FFE600':'#EE4D2D')};color:${melhor.nome==='Mercado Livre'?'#000':'#fff'}">${melhor.nome}</span></div>
+<div class="visual-price"><strong style="color:#0a9d4a;font-size:20px">${formatarPreco(melhor.dados.preco)}</strong><span style="display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;background:${estiloLoja.bg};color:${estiloLoja.cor}">${melhor.nome}</span></div>
 </a>`;
 }
 
