@@ -613,12 +613,12 @@ function atualizarBannerAchadinhos(){
      const total=ordenados.length;
      const quantidade=Math.min(POR_CATEGORIA, total);
 
-     // Janela de "quantidade" achadinhos, começando num ponto diferente a
-     // cada dia (dia 0 começa no item 0, dia 1 começa no item seguinte, e
-     // assim por diante, voltando ao início quando dá a volta completa).
-     // Assim nenhum achadinho se repete até que todos os outros já tenham
-     // aparecido no banner.
-     const inicio = diaIndex % total;
+     // Janela de "quantidade" achadinhos, andando em BLOCOS a cada dia:
+     // dia 1 mostra os itens 1-4, dia 2 mostra 5-8, dia 3 mostra 9-12...
+     // e quando os blocos acabam, volta pro bloco inicial (item 1) e
+     // recomeça o ciclo. Assim nenhum achadinho se repete até que todos
+     // os outros já tenham aparecido no banner.
+     const inicio = (diaIndex * quantidade) % total;
      const selecionados=[];
      for(let k=0;k<quantidade;k++){
        selecionados.push(ordenados[(inicio+k)%total]);
