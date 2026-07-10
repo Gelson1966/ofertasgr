@@ -591,65 +591,37 @@ function atualizarBannerAchadinhos(){
  const diaIndex = Math.floor(Date.UTC(anoDoDia, mesDoDia - 1, diaDoDia) / 86400000);
 
  {
-   // O banner agora usa a MESMA lista de "Melhores Achadinhos do Site"
-   // exibida na página de achadinhos, em vez de sortear produtos
-   // aleatórios de qualquer categoria.
+   // O banner usa a MESMA lista de "Melhores Achadinhos do Site" (um
+   // produto por subcategoria, já o de menor preço). O que gira a cada dia
+   // é QUAIS achadinhos daquela categoria aparecem: hoje pode ser
+   // air fryer + batedeira, amanhã espremedor + geladeira, etc., andando
+   // por uma janela de subcategorias diferentes até passar por todas.
    const achadinhos=obterMelhoresAchadinhos();
    CATEGORIAS.forEach(cat=>{
      if(cat.id==='pedido-cliente') return;
      const itensCategoria=achadinhos.filter(p=>p.categoria===cat.id && dadosDasLojas(p).length);
      if(!itensCategoria.length) return;
 
-     // Agrupa os produtos por subcategoria (ex.: "Ferro de Passar", "Cafeteira")
-     // para não sortear dois produtos do mesmo tipo dentro da mesma categoria.
-     const porSubcategoria={};
-     itensCategoria.forEach(p=>{
-       const sub=p.subcategoria||'outros';
-       if(!porSubcategoria[sub]) porSubcategoria[sub]=[];
-       porSubcategoria[sub].push(p);
-     });
-
-     // Ordem ESTÁVEL (sempre a mesma, não sorteada) das subcategorias e dos
-     // produtos dentro delas. É a partir dessa ordem fixa que giramos o
-     // índice a cada dia — se a ordem mudasse toda hora, a rotação perderia
+     // Ordem ESTÁVEL (sempre a mesma, não sorteada) das subcategorias dentro
+     // da categoria. É a partir dessa ordem fixa que giramos o ponto de
+     // partida a cada dia — se a ordem mudasse toda hora, a rotação perderia
      // a garantia de não repetir.
-     const subcategorias = Object.keys(porSubcategoria).sort((a,b)=>a.localeCompare(b,'pt-BR'));
-     subcategorias.forEach(sub=>{
-       porSubcategoria[sub].sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
-     });
+     const ordenados = [...itensCategoria].sort((a,b) =>
+       (a.subcategoria||'').localeCompare(b.subcategoria||'','pt-BR')
+     );
 
+     const total=ordenados.length;
+     const quantidade=Math.min(POR_CATEGORIA, total);
+
+     // Janela de "quantidade" achadinhos, começando num ponto diferente a
+     // cada dia (dia 0 começa no item 0, dia 1 começa no item seguinte, e
+     // assim por diante, voltando ao início quando dá a volta completa).
+     // Assim nenhum achadinho se repete até que todos os outros já tenham
+     // aparecido no banner.
+     const inicio = diaIndex % total;
      const selecionados=[];
-     const usados=new Set();
-
-     // 1ª passada: 1 produto por subcategoria, girando o índice do produto
-     // dentro da subcategoria a cada dia (dia 0 pega o produto 0, dia 1 pega
-     // o produto 1, e assim por diante, voltando ao início quando acabar).
-     for(const sub of subcategorias){
-       if(selecionados.length>=POR_CATEGORIA) break;
-       const lista=porSubcategoria[sub];
-       const indiceInicial = diaIndex % lista.length;
-       let produto=null;
-       for(let k=0;k<lista.length;k++){
-         const candidato=lista[(indiceInicial+k)%lista.length];
-         if(!usados.has(candidato.nome)){ produto=candidato; break; }
-       }
-       if(produto){ selecionados.push(produto); usados.add(produto.nome); }
-     }
-
-     // 2ª passada: se a categoria tiver menos de 4 subcategorias diferentes,
-     // completa com os produtos restantes, também girando a cada dia
-     // (evitando repetir o mesmo produto).
-     if(selecionados.length<POR_CATEGORIA){
-       const restantes=itensCategoria
-         .filter(p=>!usados.has(p.nome))
-         .sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
-       if(restantes.length){
-         const indiceInicial = diaIndex % restantes.length;
-         for(let k=0;k<restantes.length && selecionados.length<POR_CATEGORIA;k++){
-           const produto=restantes[(indiceInicial+k)%restantes.length];
-           if(!usados.has(produto.nome)){ selecionados.push(produto); usados.add(produto.nome); }
-         }
-       }
+     for(let k=0;k<quantidade;k++){
+       selecionados.push(ordenados[(inicio+k)%total]);
      }
 
      escolhidos.push(...selecionados);
