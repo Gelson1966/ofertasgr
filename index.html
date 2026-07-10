@@ -460,7 +460,14 @@
       font-weight: 700;
       transition: .18s ease;
     }
-    a.price-item:hover { filter: brightness(.94); transform: translateX(2px); }
+    a.price-item:hover {
+      filter: brightness(1.08);
+      transform: scale(1.045);
+      box-shadow: 0 6px 16px rgba(15,61,122,.28);
+      outline: 2px solid rgba(255,255,255,.55);
+      outline-offset: -2px;
+      z-index: 2;
+    }
     .price-item.store-magalu { color: #fff; background: var(--magalu); }
     .price-item.store-ml { color: #4d4200; background: var(--ml); }
     .price-item.store-shopee { color: #fff; background: var(--shopee); }
