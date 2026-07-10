@@ -455,6 +455,7 @@
       min-height: 35px;
       padding: 6px 9px;
       border-radius: 10px;
+      border: 2px solid transparent;
       background: #f7f9fd;
       font-size: 12px;
       font-weight: 700;
@@ -464,10 +465,12 @@
       filter: brightness(1.08);
       transform: scale(1.045);
       box-shadow: 0 6px 16px rgba(15,61,122,.28);
-      outline: 2px solid rgba(255,255,255,.55);
-      outline-offset: -2px;
       z-index: 2;
     }
+    a.price-item.store-amazon:hover { border-color: #ff9900; }
+    a.price-item.store-magalu:hover { border-color: #fff; }
+    a.price-item.store-ml:hover { border-color: #1a56b0; }
+    a.price-item.store-shopee:hover { border-color: #d9363e; }
     .price-item.store-magalu { color: #fff; background: var(--magalu); }
     .price-item.store-ml { color: #4d4200; background: var(--ml); }
     .price-item.store-shopee { color: #fff; background: var(--shopee); }
