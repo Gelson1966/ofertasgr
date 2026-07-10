@@ -138,7 +138,20 @@ function criarCard(produto) {
     ? `<img class="product-image" src="${produto.imagem}" alt="${produto.nome}" loading="lazy" onerror="this.onerror=null;this.src=this.src.replace(/\.png$/i,'.PNG');">`
     : `<span class="product-placeholder">${emojiDoProduto(produto)}</span>`;
 
-  const precos = lojas.map(loja => {
+  // Sempre as 4 lojas, em ordem alfabética, mesmo sem preço cadastrado —
+  // assim cada loja fica sempre na mesma linha em todos os cards.
+  const todasLojas = [
+    { nome: "Amazon", classe: "store-amazon", dados: produto.amazon },
+    { nome: "Magalu", classe: "store-magalu", dados: produto.magalu },
+    { nome: "Mercado Livre", classe: "store-ml", dados: produto.ml },
+    { nome: "Shopee", classe: "store-shopee", dados: produto.shopee }
+  ].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+
+  const precos = todasLojas.map(loja => {
+    const temPreco = loja.dados && loja.dados.preco !== null && loja.dados.preco !== "";
+    if (!temPreco) {
+      return `<div class="price-item price-item-empty" aria-hidden="true"></div>`;
+    }
     const melhor = Number(loja.dados.preco) === menorPreco;
     const tag = loja.dados.link ? "a" : "div";
     const linkAttributes = loja.dados.link
@@ -164,7 +177,7 @@ function criarCard(produto) {
       <div class="product-body">
         ${categoriaAtiva === "melhores" ? `<span class="product-brand" style="color:#F57C00;">🔥 ACHADINHO</span><span class="product-brand">${produto.marca || "Oferta GR"}</span>` : `<span class="product-brand">${produto.marca || "Oferta GR"}</span>`}
         <h3 class="product-name">${produto.nome}</h3>
-        <div class="price-list">${precos || '<span style="font-size:12px;color:#69758a">Preços em atualização</span>'}</div>
+        <div class="price-list">${lojas.length ? precos : '<span style="font-size:12px;color:#69758a">Preços em atualização</span>'}</div>
       </div>
       ${detalhe}
     </article>`;
